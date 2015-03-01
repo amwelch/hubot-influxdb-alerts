@@ -1,22 +1,21 @@
 {
-  "name": "hubot-example",
-  "description": "An example script package for Hubot",
-  "version": "1.0.0",
-  "author": "Tom Bell <tomb@tomb.io>",
+  "name": "hubot-influxdb-alerts",
+  "description": "Generate service alerts using influxdb queries",
+  "version": "0.1.0",
+  "author": "Alexander Welch <amwelch3@gmail.com>",
   "license": "MIT",
 
   "keywords": [
-    "hubot",
-    "hubot-scripts"
+    "hubot-influxdb"
   ],
 
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-example.git"
+    "url": "git://github.com/amwelch-oss/hubot-influxdb-alerts"
   },
 
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-example/issues"
+    "url": "git://github.com/amwelch-oss/hubot-influxdb-alerts/issues"
   },
 
   "dependencies": {
