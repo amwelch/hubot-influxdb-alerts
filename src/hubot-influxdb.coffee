@@ -1,9 +1,5 @@
 influx = require('../node_modules/influx')
-config = require("data/config")
-
-HOURS_BEFORE_REPOST = 3
-HOURS_BEFORE_ACK_REPOST = 12
-ALERT_CHECK_INTERVAL = 1000*60
+config = require("./data/config")
 
 show_help = (msg) ->
     default_db = config.config_options.default_database
@@ -109,7 +105,7 @@ process_alert = (robot, msg, query_name, data, columns) ->
         if alert_obj.status == config.ACK
             ack_ts = alert_obj.ack_ts
             cur_ts = (new Date).getTime()
-            if cur_ts - ack_ts > config.1_HOUR_MS*HOURS_BEFORE_ACK_REPOST
+            if cur_ts - ack_ts > config.ONE_HOUR_MS*config.HOURS_BEFORE_ACK_REPOST
                  new_alert(robot, msg, query_name, data, columns)
 #            else
 #                 msg.send "Not sending, acked"
@@ -117,7 +113,7 @@ process_alert = (robot, msg, query_name, data, columns) ->
         else
             created_ts = alert_obj.ts
             cur_ts = (new Date).getTime()
-            if cur_ts - created_ts > config.1_HOUR_MS*HOURS_BEFORE_REPOST
+            if cur_ts - created_ts > config.ONE_HOUR_MS*config.HOURS_BEFORE_REPOST
                  new_alert(robot, msg, query_name, data, columns)
             else
 #                 msg.send "Not sending repeat"
@@ -225,7 +221,7 @@ module.exports = (robot) ->
 
        alertIntervalId = setInterval () ->
            check_for_alerts(robot, msg)
-       , ALERT_CHECK_INTERVAL
+       , config.ALERT_CHECK_INTERVAL
        msg.send "Alert checking toggled on (corpsethumb)"
 
    robot.hear /influx alerts off/i, (msg) ->
