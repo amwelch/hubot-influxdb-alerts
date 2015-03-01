@@ -1,15 +1,23 @@
 influx = require('../node_modules/influx')
-config = require("./data/config")
+
+nconf = require("nconf")
+
+DEFAULTS_FILE = "./data/defaults.json"
+CONFIG_FILE = "../hubot-influx-config.json"
+nconf.argv()
+    .env()
+    .file({"file": CONFIG_FILE})
+    .file({"file": DEFAULTS_FILE})
 
 show_help = (msg) ->
-  default_db = config.config_options.default_database
+  default_db = nconf.get("default_database")
  
   if !default_db
     default_db = "None Set"
 
   buf = "Influx for Hubot\n\n"
   buf += "Commands: \n"
-  buf += config.config_options.commands.join("\n")
+  buf += nconf.get("COMMAND_STRINGS").join("\n")
   buf += "\n\n"
   buf += "Default Database: #{default_db}"
 
@@ -19,7 +27,7 @@ new_alert = (robot, msg, query_name, data, columns) ->
   alert_key = _form_alert_key(query_name, data, columns, [])
 
   #Used to lookup the hashed key when a user acks an alert
-  id = Math.floor(Math.random()*config.RANDOM_ID_MAX)
+  id = Math.floor(Math.random()*nconf.get("HUBOT_INFLUXALERTS_RANDOM_ID_MAX"))
   alert_id = "incident_#{id}"
   robot.brain.set(alert_id, alert_key)
 
@@ -27,10 +35,10 @@ new_alert = (robot, msg, query_name, data, columns) ->
 
   database =  find_query_db(query_name)
 
-  query_config = config.config_options.queries[database][query_name]
+  query_config = nconf.get("queries")[database][query_name]
  
   event =
-      status: config.OPEN
+      status: nconf.get("OPEN")
       assigned: 0
       ts: (new Date).getTime()
 
@@ -90,7 +98,7 @@ ack_alert = (robot, msg, id, user) ->
       alert = JSON.parse(alert_str)
       alert.ack_ts = (new Date).getTime()
       alert.ack_user = user
-      alert.status = config.ACK
+      alert.status = nconf.get("ACK")
       robot.brain.set(alert_key, JSON.stringify(alert))
       buf= "Thank you #{user} for handling alert #{id}!\n"
       buf += "You get a gold star (goldstar)."
@@ -102,16 +110,22 @@ process_alert = (robot, msg, query_name, data, columns) ->
   if alert
     alert_obj = JSON.parse(alert)
     #If it's been acknowledged wait 6 hours before reposting
-    if alert_obj.status == config.ACK
+    if alert_obj.status == nconf.get("ACK")
       ack_ts = alert_obj.ack_ts
       cur_ts = (new Date).getTime()
-      if cur_ts - ack_ts > config.ONE_HOUR_MS*config.HOURS_BEFORE_ACK_REPOST
+      hours = nconf.get("HUBOT_INFLUXALERTS_HOURS_BEFORE_ACK_REPOST")
+      interval = nconf.get("ONE_HOUR_MS")*hours
+      if cur_ts - ack_ts > interval
+
         new_alert(robot, msg, query_name, data, columns)
                     
     else
       created_ts = alert_obj.ts
       cur_ts = (new Date).getTime()
-      if cur_ts - created_ts > config.ONE_HOUR_MS*config.HOURS_BEFORE_REPOST
+      hours = nconf.get("HUBOT_INFLUXALERTS_HOURS_BEFORE_REPOST")
+      interval = nconf.get("ONE_HOUR_MS")*hours
+      if cur_ts - created_ts > interval
+
         new_alert(robot, msg, query_name, data, columns)
       else
           
@@ -124,8 +138,8 @@ redis_client = false
 
 connect = ->
   #Client for each database
-  influx_connect_config = config.config_options.connection
-  for database in Object.keys(config.config_options.queries)
+  influx_connect_config = nconf.get("connection")
+  for database in Object.keys(nconf.get("queries"))
     if (!influx_clients[database])
       influx_connect_config['database'] = database
       influx_clients[database] = influx(influx_connect_config)
@@ -133,7 +147,7 @@ connect = ->
     redis_client = redis.createClient()
 
 print_queries = (msg) ->
-  query_config = config.config_options.queries
+  query_config = nconf.get("queries")
   buf = ""
   for database in Object.keys(query_config)
     buf += "Database: #{database}\n"
@@ -144,7 +158,7 @@ print_queries = (msg) ->
   msg.send buf
 
 user_query = (query_str, database, msg) ->
-  influx_connect_config = config.config_options.connection
+  influx_connect_config = nconf.get("connection")
   if !influx_clients[database]
     influx_connect_config['database'] = database
     influx_clients[database] = influx(influx_connect_config)
@@ -154,7 +168,7 @@ user_query = (query_str, database, msg) ->
   )
 
 find_query_db = (query_name) ->
-  query_config = config.config_options.queries
+  query_config = nconf.get("queries")
   query_db = false
   for database in Object.keys(query_config)
     for q in Object.keys(query_config[database])
@@ -163,7 +177,7 @@ find_query_db = (query_name) ->
   return query_db
 
 run_query = (query_name, msg) ->
-  query_config = config.config_options.queries
+  query_config = nconf.get("queries")
   query_db = find_query_db(query_name)
 
   if !query_db
@@ -200,9 +214,9 @@ check_alert = (robot, msg, query_name, query, database) ->
 
 check_for_alerts = (robot, msg) ->
   connect()
-  for database in Object.keys(config.config_options.queries)
-    for query_name in Object.keys(config.config_options.queries[database])
-      query_config = config.config_options.queries[database][query_name]
+  for database in Object.keys(nconf.get("queries"))
+    for query_name in Object.keys(nconf.get("queries")[database])
+      query_config = nconf.get("queries")[database][query_name]
       if query_config.alert
         query = query_config.query
         check_alert(robot, msg, query_name, query, database)
@@ -218,7 +232,7 @@ module.exports = (robot) ->
 
     alertIntervalId = setInterval () ->
       check_for_alerts(robot, msg)
-    , config.ALERT_CHECK_INTERVAL
+    , nconf.get("ALERT_HUBOT_INFLUXALERTS_CHECK_INTERVAL")
     msg.send "Alert checking toggled on (corpsethumb)"
 
   robot.hear /influx alerts off/i, (msg) ->
@@ -252,7 +266,7 @@ module.exports = (robot) ->
     query = query_args[1]
     database = query_args[2]
     if not database
-      database = config.config_options.default_database
+      database = nconf.get("default_database")
       if not database
         msg.send "No Database specified and no default set. Cannot query"
         return

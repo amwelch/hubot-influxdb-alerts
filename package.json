@@ -27,6 +27,7 @@
     "chai": "*",
     "sinon-chai": "*",
     "influx": "*",
+    "nconf": "*",
     "sinon": "*"
   },
 

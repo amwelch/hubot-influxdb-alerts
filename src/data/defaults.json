@@ -1,0 +1,17 @@
+{
+  "OPEN": 0,
+  "ACK": 1,
+  "HUBOT_INFLUXALERTS_RANDOM_ID_MAX": 1001,
+  "HUBOT_INFLUXALERTS_HOURS_BEFORE_REPOST": 3,
+  "HUBOT_INFLUX_ALERTS_HOURS_BEFORE_ACK_REPOST": 12,
+  "HUBOT_INFLUX_ALERT_CHECK_INTERVAL": 60000,
+  "ONE_HOUR_MS": 3600000,
+  "COMMAND_STRINGS": [
+    "influx alerts {off|ok} - toggled automatic alert checking off or on",
+    "influx show - list available query aliases",
+    "influx run QUERY_NAME - run a query alias",
+    "influx query \"QUERY\" [DATABASE] - run a custom query",
+    "influx alerts check - force hubot to run the alert queries. Useful for debugging",
+    "influx claim ID - claim an alert and stop it from posting the same alert for #{exports.HOURS_BEFORE_ACK_REPOST} hour(s) "
+  ],
+}
