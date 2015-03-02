@@ -17,3 +17,7 @@ describe 'hello-world', ->
 
   it 'registers a hear listener', ->
     expect(@robot.hear).to.have.been.calledWith(/orly/)
+
+describe 'test-require', ->
+  it 'requries hubot-influxdb-alerts', ->
+    require('../src/hubot-influxdb')
