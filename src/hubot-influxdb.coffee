@@ -211,6 +211,8 @@ format_query_result = (query_json) ->
 
 check_alert = (robot, msg, query_name, query, database) ->
   influx_clients[database].query(query, (e, results) ->
+    if !results
+      return
     for data in results
       columns = data.columns
       for result in data.points
