@@ -13,5 +13,5 @@
     "influx query \"QUERY\" [DATABASE] - run a custom query",
     "influx alerts check - force hubot to run the alert queries. Useful for debugging",
     "influx claim ID - claim an alert and stop it from posting the same alert for #{exports.HOURS_BEFORE_ACK_REPOST} hour(s) "
-  ],
+  ]
 }
