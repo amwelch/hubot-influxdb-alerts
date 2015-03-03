@@ -1,13 +1,15 @@
 influx = require('../node_modules/influx')
-
 nconf = require("nconf")
 
-DEFAULTS_FILE = "./data/defaults.json"
-CONFIG_FILE = "../hubot-influx-config.json"
+cwd = process.cwd()
+
+DEFAULTS_FILE = "#{__dirname}/data/defaults.json"
+CONFIG_FILE = "#{cwd}/config/hubot-influx-config.json"
+
 nconf.argv()
     .env()
-    .file({"file": CONFIG_FILE})
-    .file({"file": DEFAULTS_FILE})
+    .file('environment', CONFIG_FILE)
+    .file('defaults', DEFAULTS_FILE)
 
 show_help = (msg) ->
   default_db = nconf.get("default_database")
@@ -134,20 +136,24 @@ process_alert = (robot, msg, query_name, data, columns) ->
        
 
 influx_clients = {}
-redis_client = false
 
 connect = ->
   #Client for each database
   influx_connect_config = nconf.get("connection")
-  for database in Object.keys(nconf.get("queries"))
-    if (!influx_clients[database])
-      influx_connect_config['database'] = database
-      influx_clients[database] = influx(influx_connect_config)
-  if (!redis_client)
-    redis_client = redis.createClient()
+
+  queries = nconf.get("queries")
+  if queries
+    for database in Object.keys(nconf.get("queries"))
+      if (!influx_clients[database])
+        influx_connect_config['database'] = database
+        influx_clients[database] = influx(influx_connect_config)
 
 print_queries = (msg) ->
   query_config = nconf.get("queries")
+  if !query_config
+    msg.send "No queries configured"
+    return
+
   buf = ""
   for database in Object.keys(query_config)
     buf += "Database: #{database}\n"
