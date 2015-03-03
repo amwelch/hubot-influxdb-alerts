@@ -3,7 +3,7 @@ nconf = require("nconf")
 
 cwd = process.cwd()
 
-DEFAULTS_FILE = "#{cwd}/scripts/data/defaults.json"
+DEFAULTS_FILE = "#{__dirname}/data/defaults.json"
 CONFIG_FILE = "#{cwd}/config/hubot-influx-config.json"
 
 a = require(DEFAULTS_FILE)
@@ -144,8 +144,8 @@ connect = ->
   #Client for each database
   influx_connect_config = nconf.get("connection")
 
-  queries = nconf.get("queries") 
-  if queries 
+  queries = nconf.get("queries")
+  if queries
     for database in Object.keys(nconf.get("queries"))
       if (!influx_clients[database])
         influx_connect_config['database'] = database
@@ -154,8 +154,8 @@ connect = ->
 print_queries = (msg) ->
   query_config = nconf.get("queries")
   if !query_config
-      msg.send "No queries configured"
-      return
+    msg.send "No queries configured"
+    return
 
   buf = ""
   for database in Object.keys(query_config)
