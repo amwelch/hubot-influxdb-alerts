@@ -6,9 +6,6 @@ cwd = process.cwd()
 DEFAULTS_FILE = "#{__dirname}/data/defaults.json"
 CONFIG_FILE = "#{cwd}/config/hubot-influx-config.json"
 
-a = require(DEFAULTS_FILE)
-b = require(CONFIG_FILE)
-
 nconf.argv()
     .env()
     .file('environment', CONFIG_FILE)
