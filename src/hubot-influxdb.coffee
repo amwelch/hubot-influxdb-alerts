@@ -50,8 +50,13 @@ new_alert = (robot, msg, query_name, data, columns) ->
   buf = make_alert_message(query_config, data, columns, msg)
   buf += "\n"
   buf += "To claim this alert use the id #{id}. \"influx claim #{id}\"\n"
-  msg.send buf
-
+  if msg
+    msg.send buf
+  else
+    console.log("sending room alert")
+    room = nconf.get("HUBOT_INFLUXALERTS_ALERT_ROOM")
+    if room
+      robot.messageRoom room, buf
 
 make_alert_message = (query_object, data, columns, msg) ->
   query_columns = query_object.alert_msg.columns
@@ -118,7 +123,6 @@ process_alert = (robot, msg, query_name, data, columns) ->
       hours = nconf.get("HUBOT_INFLUXALERTS_HOURS_BEFORE_ACK_REPOST")
       interval = nconf.get("ONE_HOUR_MS")*hours
       if cur_ts - ack_ts > interval
-
         new_alert(robot, msg, query_name, data, columns)
                     
     else
@@ -164,6 +168,14 @@ print_queries = (msg) ->
   msg.send buf
 
 user_query = (query_str, database, msg) ->
+
+  #Check if we allow custom queries
+  allowed = nconf.get("HUBOT_INFLUXALERTS_ALLOW_USER_QUERIES")
+
+  if !allowed
+    msg.send "Custom queries disabled. Ask you administrator to enable"
+    return
+
   influx_connect_config = nconf.get("connection")
   if !influx_clients[database]
     influx_connect_config['database'] = database
@@ -194,10 +206,13 @@ run_query = (query_name, msg) ->
   else
     query = query_config[query_db][query_name].query
     influx_clients[query_db].query(query, (e, return_series) ->
+      msg.send "Got " + JSON.stringify(return_series)
       msg.send format_query_result(return_series)
     )
 
 format_query_result = (query_json) ->
+  if query_json.length == 0
+    return "No results returned"
   for result in query_json
     columns = result.columns
     data = result.points
@@ -212,6 +227,8 @@ format_query_result = (query_json) ->
 check_alert = (robot, msg, query_name, query, database) ->
   influx_clients[database].query(query, (e, results) ->
     if !results
+      if msg
+        msg.send "No results #{query_name}"
       return
     for data in results
       columns = data.columns
@@ -220,7 +237,7 @@ check_alert = (robot, msg, query_name, query, database) ->
   )
 
 
-check_for_alerts = (robot, msg) ->
+check_for_alerts = (robot, msg, verbose) ->
   connect()
   for database in Object.keys(nconf.get("queries"))
     for query_name in Object.keys(nconf.get("queries")[database])
@@ -233,13 +250,20 @@ module.exports = (robot) ->
 
   alertIntervalId = false
 
+  #automatically turn on alerts if configured
+  alert_room = nconf.get "HUBOT_INFLUXALERTS_AUTO_ALERT_ROOM"
+  if alert_room
+    alertIntervalId = setInterval ->
+      check_for_alerts robot
+    , nconf.get("ALERT_HUBOT_INFLUXALERTS_CHECK_INTERVAL")
+
   robot.hear /influx alerts on/i, (msg) ->
     if alertIntervalId
       msg.send "Alert checking already on"
       return
 
-    alertIntervalId = setInterval () ->
-      check_for_alerts(robot, msg)
+    alertIntervalId = setInterval ->
+      check_for_alerts(robot, undefined)
     , nconf.get("ALERT_HUBOT_INFLUXALERTS_CHECK_INTERVAL")
     msg.send "Alert checking toggled on (corpsethumb)"
 
