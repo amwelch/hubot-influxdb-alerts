@@ -168,6 +168,14 @@ print_queries = (msg) ->
   msg.send buf
 
 user_query = (query_str, database, msg) ->
+
+  #Check if we allow custom queries
+  allowed = nconf.get("HUBOT_INFLUXALERTS_ALLOW_USER_QUERIES")
+
+  if !allowed
+    msg.send "Custom queries disabled. Ask you administrator to enable"
+    return
+
   influx_connect_config = nconf.get("connection")
   if !influx_clients[database]
     influx_connect_config['database'] = database
