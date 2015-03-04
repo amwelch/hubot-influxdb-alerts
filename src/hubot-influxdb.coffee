@@ -250,7 +250,7 @@ module.exports = (robot) ->
   alertIntervalId = false
 
   #automatically turn on alerts if configured
-  alert_room = nconf.get "HUBOT_INFLUXALERTS_AUTO_ALERT_ROOM"
+  alert_room = nconf.get "HUBOT_INFLUXALERTS_ALERT_ROOM"
   if alert_room
     alertIntervalId = setInterval ->
       check_for_alerts robot
