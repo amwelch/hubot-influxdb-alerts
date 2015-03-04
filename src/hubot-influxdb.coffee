@@ -206,7 +206,6 @@ run_query = (query_name, msg) ->
   else
     query = query_config[query_db][query_name].query
     influx_clients[query_db].query(query, (e, return_series) ->
-      msg.send "Got " + JSON.stringify(return_series)
       msg.send format_query_result(return_series)
     )
 
