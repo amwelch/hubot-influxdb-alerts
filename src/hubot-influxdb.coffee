@@ -253,7 +253,7 @@ module.exports = (robot) ->
   #automatically turn on alerts if configured
   alert_room = nconf.get "HUBOT_INFLUXALERTS_AUTO_ALERT_ROOM"
   if alert_room
-    alertIntervalId = setInterval () ->
+    alertIntervalId = setInterval ->
       check_for_alerts robot
     , nconf.get("ALERT_HUBOT_INFLUXALERTS_CHECK_INTERVAL")
 
@@ -262,7 +262,7 @@ module.exports = (robot) ->
       msg.send "Alert checking already on"
       return
 
-    alertIntervalId = setInterval () ->
+    alertIntervalId = setInterval ->
       check_for_alerts(robot, undefined)
     , nconf.get("ALERT_HUBOT_INFLUXALERTS_CHECK_INTERVAL")
     msg.send "Alert checking toggled on (corpsethumb)"
