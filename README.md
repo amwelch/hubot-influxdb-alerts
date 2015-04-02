@@ -15,13 +15,14 @@ The following options can be set as environment variables:
 	HUBOT_INFLUX_ALERTS_HOURS_BEFORE_ACK_REPOST #Hours between posting a claimed alert: Default 12 
 	HUBOT_INFLUX_ALERT_CHECK_INTERVAL #Time in ms between running the queries 60000
 
+
 The rest of the config is handled in a json file in config/hubot-influx-config.json in the project directory
-	#Used to connect to influx
+
 	"connection": {
-          "username": "foo-user",
-          "password": "bar-password",
-          "host": "localhost",
-          "port": "8086
+	  "username": "foo-user",
+	  "password": "bar-password",
+	  "host": "localhost",
+	  "port": "8086
  	},
 	"default_database": "my-database" #if database is not specified in query config use this
  	"queries": {
