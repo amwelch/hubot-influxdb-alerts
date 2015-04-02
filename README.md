@@ -19,6 +19,7 @@ The following options can be set as environment variables:
 The rest of the config is handled in a json file in config/hubot-influx-config.json in the project directory
 
 Authenticate with influxdb
+
 	"connection": {
 	  "username": "foo-user",
 	  "password": "bar-password",
@@ -28,16 +29,19 @@ Authenticate with influxdb
 	"default_database": "my-database" #if database is not specified in query config use this
 
 Register queries
+
  	"queries": {
 	  "my-database":{
 
 This query will only run when a user calls influx run test-no-alert. It will not generate any alerts
+
 	    "test-no-alert": {	
 	      "query": "SOMEINFLUXDBQUERY"
 	    },
 
 This query is run as part of the alert suite. For each row "template" is written to chat with the template variables
 filled in using the columns in "columns".
+
 	    "test-alert": {
 	      "query": "select firstname,lastname from foo",
 	       "alert": true",
