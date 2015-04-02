@@ -15,7 +15,6 @@ The following options can be set as environment variables:
 	HUBOT_INFLUX_ALERTS_HOURS_BEFORE_ACK_REPOST #Hours between posting a claimed alert: Default 12 
 	HUBOT_INFLUX_ALERT_CHECK_INTERVAL #Time in ms between running the queries 60000
 
-###Note: This is a temporary measure. I will add in a better way to do the complex config shortly
 The rest of the config is handled in a json file in config/hubot-influx-config.json in the project directory
 	#Used to connect to influx
 	"connection": {
@@ -26,21 +25,19 @@ The rest of the config is handled in a json file in config/hubot-influx-config.j
  	},
 	"default_database": "my-database" #if database is not specified in query config use this
  	"queries": {
-		"my-database":{
-			#This query will only run when the user specifies it with influx run test-no-alert. It does not generate any alerts
-			"test-no-alert": {	
-				"query": "SOMEINFLUXDBQUERY"
-			},
-			"test-alert": {
-				#This query will send the error message "template" to chat for every row that returns. The template will be filled in with the columns in "columns".
-				"query": "select firstname,lastname from foo",
-				"alert": true",
-				"alert_msg": {
-					"template": "Danger, {0} {1} everything is broken",
-					"columns": ["firstname", "lastname"]
-				}
-			}
-		}
+	  "my-database":{
+	    "test-no-alert": {	
+	      "query": "SOMEINFLUXDBQUERY"
+	    },
+	    "test-alert": {
+	      "query": "select firstname,lastname from foo",
+	       "alert": true",
+	       "alert_msg": {
+	         "template": "Danger, {0} {1} everything is broken",
+	         "columns": ["firstname", "lastname"]
+	       }
+	     }
+	  }
 	}
 
 ##Commands
