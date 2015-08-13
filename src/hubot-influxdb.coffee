@@ -1,4 +1,32 @@
-influx = require('../node_modules/influx')
+# Description:
+#   Create and manage alerts in your chatroom using hubot and influxdb
+#
+# Dependencies:
+#   "influx": "^3.4.0"
+#
+# Configuration:
+#   HUBOT_INFLUXALERTS_AUTO_ALERT_ROOM # the chat room to post alerts to
+#   #Optional
+#   HUBOT_INFLUXALERTS_HOURS_BEFORE_REPOST #Hours between posting an unclaimed alert. Default: 3
+#   HUBOT_INFLUX_ALERTS_HOURS_BEFORE_ACK_REPOST #Hours between posting a claimed alert: Default 12
+#   HUBOT_INFLUX_ALERT_CHECK_INTERVAL #Time in ms between running the queries 60000
+#
+# Commands:
+#
+#    hubot influx alerts {off|ok} - toggled automatic alert checking off or on
+#    hubot influx show - list available query aliases
+#    hubot influx run QUERY_NAME - run a query alias
+#    hubot influx query \"QUERY\" [DATABASE] - run a custom query
+#    hubot influx alerts check - force hubot to run the alert queries. Useful for debugging
+#    hubot influx claim ID - claim an alert and stop it from posting the same alert for #{exports.HOURS_BEFORE_ACK_REPOST} hour(s)
+#
+# Notes:
+#   Configuration is done in ./config/hubot-influx-config.json
+#
+# Author:
+#   amwelch
+
+influx = require('influx')
 nconf = require("nconf")
 
 cwd = process.cwd()
@@ -13,7 +41,7 @@ nconf.argv()
 
 show_help = (msg) ->
   default_db = nconf.get("default_database")
- 
+
   if !default_db
     default_db = "None Set"
 
@@ -38,7 +66,7 @@ new_alert = (robot, msg, query_name, data, columns) ->
   database =  find_query_db(query_name)
 
   query_config = nconf.get("queries")[database][query_name]
- 
+
   event =
       status: nconf.get("OPEN")
       assigned: 0
@@ -73,7 +101,7 @@ hashCode = (str) ->
     char = str.charCodeAt(i)
     hash = ((hash<<5)-hash)+char
     hash = hash & hash
-  
+
   hash
 
 
@@ -84,13 +112,13 @@ _form_alert_key = (query_name, points, columns, ignore_fields) ->
 
   #Default ignore
   ignore_fields.push("metric")
-  
+
   hash_points = []
   for col,i in columns
     if col in ignore_fields
       continue
     hash_points.push points[i]
-          
+
   hashCode(query_name + hash_points.join(""))
 
 ack_alert = (robot, msg, id, user) ->
@@ -124,7 +152,7 @@ process_alert = (robot, msg, query_name, data, columns) ->
       interval = nconf.get("ONE_HOUR_MS")*hours
       if cur_ts - ack_ts > interval
         new_alert(robot, msg, query_name, data, columns)
-                    
+
     else
       created_ts = alert_obj.ts
       cur_ts = (new Date).getTime()
@@ -134,10 +162,10 @@ process_alert = (robot, msg, query_name, data, columns) ->
 
         new_alert(robot, msg, query_name, data, columns)
       else
-          
+
   else
     new_alert(robot, msg, query_name, data, columns)
-       
+
 
 influx_clients = {}
 
@@ -221,7 +249,7 @@ format_query_result = (query_json) ->
 
   buf += "\n"
   return buf
-        
+
 
 check_alert = (robot, msg, query_name, query, database) ->
   influx_clients[database].query(query, (e, results) ->
@@ -285,7 +313,7 @@ module.exports = (robot) ->
     query_pat = ///\"([^\"]+)\"\s*([^\s]*)///i
 
     msg.send msg.match[1]
-    
+
     query_args = msg.match[1].match query_pat
     if !query_args
       buf = "Badly formatted query args."
@@ -293,7 +321,7 @@ module.exports = (robot) ->
       msg.send buf
 
       return
-          
+
     query = query_args[1]
     database = query_args[2]
     if not database
