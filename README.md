@@ -7,6 +7,7 @@ Runs pre-set influxdb queries periodically. If any queries return a result each 
 ##Configuration
 
 The following options can be set as environment variables:
+
 	#Required
 	HUBOT_INFLUXALERTS_AUTO_ALERT_ROOM #the chat room to post alerts to
 	
@@ -24,7 +25,7 @@ Authenticate with influxdb
 	  "username": "foo-user",
 	  "password": "bar-password",
 	  "host": "localhost",
-	  "port": "8086
+	  "port": "8086"
  	},
 	"default_database": "my-database" #if database is not specified in query config use this
 
