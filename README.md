@@ -21,38 +21,40 @@ The rest of the config is handled in a json file in config/hubot-influx-config.j
 
 Authenticate with influxdb
 
-	"connection": {
-	  "username": "foo-user",
-	  "password": "bar-password",
-	  "host": "localhost",
-	  "port": "8086"
- 	},
-	"default_database": "my-database" #if database is not specified in query config use this
+       {
+          "connection": {
+          "username": "foo-user",
+          "password": "bar-password",
+          "host": "localhost",
+          "port": "8086"
+          },
+          "default_database": "my-database", #if database is not specified in query config use this
 
 Register queries
 
- 	"queries": {
-	  "my-database":{
+          "queries": {
+            "my-database": {
 
 This query will only run when a user calls influx run test-no-alert. It will not generate any alerts
 
-	    "test-no-alert": {	
-	      "query": "SOMEINFLUXDBQUERY"
-	    },
+              "test-no-alert": {
+                "query": "SOMEINFLUXDBQUERY"
+              },
 
 This query is run as part of the alert suite. For each row "template" is written to chat with the template variables
 filled in using the columns in "columns".
 
-	    "test-alert": {
-	      "query": "select firstname,lastname from foo",
-	       "alert": true",
-	       "alert_msg": {
-	         "template": "Danger, {0} {1} everything is broken",
-	         "columns": ["firstname", "lastname"]
-	       }
-	     }
-	  }
-	}
+              "test-alert": {
+                "query": "select firstname,lastname from foo",
+                "alert": true,
+                "alert_msg": {
+                  "template": "Danger, {0} {1} everything is broken",
+                  "columns": ["firstname", "lastname"]
+                }
+              }
+            }
+          }
+        }
 
 ##Commands
 
