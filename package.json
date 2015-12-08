@@ -20,7 +20,8 @@
 
   "dependencies": {
     "coffee-script": "~1.6",
-    "influx": "*"
+    "influx": "*",
+    "nconf": "*"
   },
 
   "devDependencies": {
