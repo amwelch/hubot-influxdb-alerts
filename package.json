@@ -19,14 +19,15 @@
   },
 
   "dependencies": {
-    "coffee-script": "~1.6"
+    "coffee-script": "~1.6",
+    "influx": "*",
+    "nconf": "*"
   },
 
   "devDependencies": {
     "mocha": "*",
     "chai": "*",
     "sinon-chai": "*",
-    "influx": "*",
     "nconf": "*",
     "sinon": "*"
   },
